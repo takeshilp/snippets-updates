@@ -4,7 +4,7 @@
 
 Сниппеты — небольшое бесплатное расширение для Chrome и Edge: вы печатаете короткое сокращение в поле ввода, и на его месте появляется готовый текст (шаблоны, формы, колесо сниппетов). Работает только на тех сайтах, которые вы сами укажете в настройках; на остальных ничего не делает. Бесплатно для некоммерческого использования.
 
-Здесь лежат установщик, обновляющий скрипт и подписанные релизы. Интерфейс расширения на русском.
+Здесь лежат установщик, обновляющий скрипт и релизы. Интерфейс расширения на русском.
 
 ## Установка (Windows)
 
@@ -15,7 +15,7 @@
    ```
 
 2. Если расширение уже стоит, установщик найдёт его сам; ваши данные сохранятся. Если нет, он скачает расширение и покажет папку. Откройте `chrome://extensions` (или `edge://extensions`), включите **Режим разработчика**, нажмите **Загрузить распакованное расширение** и выберите эту папку.
-3. Первый запуск: значок расширения → менеджер → ⚙ → «Сайты», добавьте сайты, где нужны сниппеты. Пока список пуст, расширение нигде не работает.
+3. Первый запуск: пока список сайтов пуст, расширение работает на всех сайтах. Чтобы ограничить его, добавьте нужные сайты: значок расширения → менеджер → ⚙ → «Сайты» или правый клик на странице → «Сниппеты» → «Добавить сайт в список».
 
 ## Как работают обновления
 
@@ -38,7 +38,8 @@
 
 - Код минифицирован, но не секретен: браузер его получает, любой может прочитать.
 - Скрипты расширения загружаются на всех сайтах, но вне вашего списка ничего не делают (читают только ваш список сайтов).
-- Релизы подписаны: ключ у издателя, установщик не примет версию без верной подписи. Новая установка доверяет этому репозиторию в момент установки.
+- С версии 0.17.0 релизы не подписываются: обновлятор проверяет только контрольную сумму архива (защита от битой загрузки). Тот, кто управляет этим репозиторием, может выпустить любую версию.
+- **Обновление с 0.16:** установленный обновлятор 0.16 принимает только подписанные релизы, поэтому один раз выполните команду установки ещё раз: она найдёт расширение, заменит обновлятор и сохранит ваши данные. Дальше обновления снова идут сами.
 - Корпоративные политики могут запрещать PowerShell или нераспакованные расширения.
 - Лицензия: PolyForm Noncommercial 1.0.0, см. `LICENSE`.
 
@@ -50,7 +51,7 @@
 
 Snippets is a small, free extension for Chrome and Edge: type a short abbreviation in a text field and it turns into ready text (templates, forms, a snippet wheel). It works only on the sites you list yourself in its settings and does nothing elsewhere. Free for non-commercial use.
 
-This repository holds the installer, the updater script and signed releases. The extension interface is in Russian.
+This repository holds the installer, the updater script and the releases. The extension interface is in Russian.
 
 ## Install (Windows)
 
@@ -61,7 +62,7 @@ This repository holds the installer, the updater script and signed releases. The
    ```
 
 2. If the extension is already installed, the installer finds it and keeps your data. If not, it downloads the extension and prints a folder. Open `chrome://extensions` (or `edge://extensions`), turn on **Developer mode**, click **Load unpacked** and pick that folder.
-3. First run: extension icon → manager → ⚙ → «Сайты», add the sites where you want snippets. While the list is empty the extension works nowhere.
+3. First run: while the site list is empty the extension works on every site. To limit it, add your sites: extension icon → manager → ⚙ → «Сайты», or right click on the page → «Сниппеты» → «Добавить сайт в список».
 
 ## How updates work
 
@@ -84,6 +85,7 @@ Close the browser, then rename the extension folder `<folder>` to `<folder>.new`
 
 - The code is minified, not secret: the browser receives it, anyone can read it.
 - The extension scripts load on every site but do nothing outside your list (they read only your site list).
-- Releases are signed: the key is held by the publisher, the updater rejects a version without a valid signature. A new install trusts this repository at install time.
+- Since 0.17.0 releases are not signed: the updater checks only the archive's checksum (a broken download). Whoever controls this repository can ship any version.
+- **Updating from 0.16:** the 0.16 updater accepts signed releases only, so run the install command once more: it finds the extension, replaces the updater and keeps your data. After that updates come by themselves again.
 - Corporate policies may block PowerShell or unpacked extensions.
 - License: PolyForm Noncommercial 1.0.0, see `LICENSE`.

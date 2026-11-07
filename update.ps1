@@ -1,11 +1,10 @@
 # Snippets updater (docs/updates.md). ASCII only: Windows PowerShell 5.1 reads a BOM-less file as ANSI.
-# Runs from a per-user scheduled task (hourly and at logon). Stages a newer signed release next to the extension folder and swaps the folders
+# Runs from a per-user scheduled task (hourly and at logon). Stages a newer release next to the extension folder and swaps the folders
 # only while the browser is closed (never while it runs: the browser would mix old and new files). Nothing is ever reloaded.
 #   update.ps1 [-Config <config.json>] [-NoWait] [-Uninstall]
 param([string]$Config = (Join-Path $PSScriptRoot 'config.json'), [switch]$NoWait, [switch]$Uninstall)
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$PublicKey = '<RSAKeyValue><Modulus>v/8rLSLWPav1C3QYk6fsmNJEHPGk/bpmy1vBZfqyIEiGMPkD31XthDxhUC5CTSQ0VeOPqQH3S812/j1mCVIrbBrMXAB6WB7mNl4ZE6uJhmmYU9OeW9gBMYneHrH7eI632OdzuKWVec9hcmIuNYFFmLBWgQaz2RNNKCuNHfWGNc/fsuQsL6oStweZktO3r2Xis20PD/EpDyUgzYKgDpvxGU41/gKH44eP9JmCfprXaV7ZKt2tokUJ4QVqWCCfDPMfqRzJoUo0Q3jdGTcRFN2R7veqwSkbD+Vm8KlBtvppCmSKpruzor9QrHIP+Tikyr4LAbdTkhzXWMggHMbUw4a3yU+mqX8Tfz2RU+P1RZe82LA2YminMGiJ9E3vMsEW4YiRabIfzh4S1RfvwmTTLm5RGU/ufgrOlBoqgqTxKbb1orR2lk3XQyHJgxCW5CmRV/QlNUN4hPk9Vwlypx9H+8B1zs9pNkMElh9o3aQR+wTJpLPkleFSnlUOyoL8WtPqjcZt</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>'
 
 $script:rc = 0
 $HomeDir = Split-Path -Parent $Config
@@ -77,15 +76,11 @@ function Main {
     return $null
   }
 
-  # 4. the latest signed release
+  # 4. the latest release (0.17: not signed any more; the sha256 catches a broken download, a sig field of an older release is ignored)
   $l = $null
   try {
     $l = Get-Text ([string]$cfg.latest) | ConvertFrom-Json
-    if ($l.version -notmatch '^\d+\.\d+\.\d+$' -or $l.sha256 -notmatch '^[0-9a-f]{64}$' -or -not $l.sig -or -not $l.url) { throw 'latest.json is malformed' }
-    $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider
-    $rsa.FromXmlString($PublicKey)
-    $okSig = $rsa.VerifyData([Text.Encoding]::UTF8.GetBytes("snippets|$($l.version)|$($l.sha256)"), 'SHA256', [Convert]::FromBase64String([string]$l.sig))
-    if (-not $okSig) { Log 'latest.json: bad signature, ignored'; $script:rc = 1; return }
+    if ($l.version -notmatch '^\d+\.\d+\.\d+$' -or $l.sha256 -notmatch '^[0-9a-f]{64}$' -or -not $l.url) { throw 'latest.json is malformed' }
   } catch {
     Log ('could not get the latest release: ' + $_.Exception.Message)
     if (-not (Get-Staged)) { $script:rc = 1; return }
