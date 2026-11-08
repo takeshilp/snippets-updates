@@ -141,6 +141,8 @@ function Main {
       if (Test-Path -LiteralPath $Old) { Remove-Item -LiteralPath $Old -Recurse -Force }
       if ($loaded) { [IO.Directory]::Move($D, $Old) } elseif (Test-Path -LiteralPath $D) { Remove-Item -LiteralPath $D -Recurse -Force }
       try { [IO.Directory]::Move($Next, $D) } catch { if ($loaded) { [IO.Directory]::Move($Old, $D) }; throw }
+      # an add-on put into the folder by hand stays with the new version (docs/addon.md); never a reason to redo the swap
+      try { if ($loaded -and (Test-Path -LiteralPath (Join-Path $Old 'addon.js'))) { Copy-Item -LiteralPath (Join-Path $Old 'addon.js') -Destination $D -Force } } catch { Log ('add-on not kept: ' + $_.Exception.Message) }
       Remove-Item -LiteralPath $Staged -Force -ErrorAction SilentlyContinue
       Log "updated $installed -> $target"
       return
