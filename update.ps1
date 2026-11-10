@@ -141,8 +141,22 @@ function Main {
       if (Test-Path -LiteralPath $Old) { Remove-Item -LiteralPath $Old -Recurse -Force }
       if ($loaded) { [IO.Directory]::Move($D, $Old) } elseif (Test-Path -LiteralPath $D) { Remove-Item -LiteralPath $D -Recurse -Force }
       try { [IO.Directory]::Move($Next, $D) } catch { if ($loaded) { [IO.Directory]::Move($Old, $D) }; throw }
-      # the add-ons put into the folder by hand stay with the new version (docs/addon.md); never a reason to redo the swap
-      foreach ($a in 'addon.js', 'addon-breaks.js') { try { if ($loaded -and (Test-Path -LiteralPath (Join-Path $Old $a))) { Copy-Item -LiteralPath (Join-Path $Old $a) -Destination $D -Force } } catch { Log ($a + ' not kept: ' + $_.Exception.Message) } }
+      # the add-ons put into the folder by hand stay with the new version, in addons\ (docs/addon.md); never a reason to redo the swap.
+      # Root files are a version before 0.27 (or an older updater's copy) and move into addons\; an empty slot never covers an add-on.
+      if ($loaded) {
+        $ad = Join-Path $D 'addons'
+        $from = @('addon.js', 'addon-breaks.js' | ForEach-Object { Join-Path $Old $_ })
+        if (Test-Path -LiteralPath (Join-Path $Old 'addons')) { $from += @(Get-ChildItem -LiteralPath (Join-Path $Old 'addons') -File | ForEach-Object { $_.FullName }) }
+        foreach ($p in $from) {
+          try {
+            if (-not (Test-Path -LiteralPath $p)) { continue }
+            $t = [IO.File]::ReadAllText($p).Trim()
+            if ($t -eq '' -or ($t.StartsWith('//') -and $t.IndexOf("`n") -lt 0)) { continue }  # an empty slot: the new version has its own
+            [void][IO.Directory]::CreateDirectory($ad)
+            Copy-Item -LiteralPath $p -Destination $ad -Force
+          } catch { Log ((Split-Path $p -Leaf) + ' not kept: ' + $_.Exception.Message) }
+        }
+      }
       Remove-Item -LiteralPath $Staged -Force -ErrorAction SilentlyContinue
       Log "updated $installed -> $target"
       return
