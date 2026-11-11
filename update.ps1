@@ -138,6 +138,8 @@ function Main {
   for ($i = 1; $i -le $tries; $i++) {
     if (Test-Running) { Log 'the browser started again, swap postponed'; return }
     try {
+      # a try whose roll-back failed too left the installed version in D.old: put it back before D.old is removed
+      if (-not (Test-Path -LiteralPath $D) -and (Test-Path -LiteralPath $Old)) { [IO.Directory]::Move($Old, $D) }
       if (Test-Path -LiteralPath $Old) { Remove-Item -LiteralPath $Old -Recurse -Force }
       if ($loaded) { [IO.Directory]::Move($D, $Old) } elseif (Test-Path -LiteralPath $D) { Remove-Item -LiteralPath $D -Recurse -Force }
       try { [IO.Directory]::Move($Next, $D) } catch { if ($loaded) { [IO.Directory]::Move($Old, $D) }; throw }
